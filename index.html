@@ -1,35 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Chromecast URL Player</title>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="css/bootstrap.css" />
-    <link rel="stylesheet" href="css/bootswatch.min.css" />
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Jura:600' rel='stylesheet' type='text/css'>
-    <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
-    <script type="text/javascript" src="js/castplayer.js"></script>
-    <script type="text/javascript" src="js/urlplayer.js"></script>
+    <title>ARD Mediathek auf Chromecast streamen</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/bootstrap-select.min.css">
   </head>
   <body>
     <!-- top bar -->
-    <div class="navbar navbar-default navbar-fixed-top">
+    <div class="navbar navbar-default">
       <div class="container">
         <div class="navbar-header">
-          <a href="../" class="navbar-brand" style="font-family: 'Jura', sans-serif; font-size: 200%;">Chromecast URL Player</a>
-          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-        </div>
-        <div class="navbar-collapse collapse" id="navbar-main">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="https://github.com/vickyg3/UrlPlayer" target="_blank">Source Code</a></li>
-          </ul>
-
+          <a href="../" class="navbar-brand" style="font-size: 200%;">ARD Mediathek auf Chromecast streamen</a>
         </div>
       </div>
     </div>
@@ -38,87 +21,100 @@
     <!-- main body -->
     <div class="container">
       <br/>
-      <div class="alert alert-info" style="text-align: center; display:none;" id="controls">
-        Now playing <b id="player_now_playing"></b>
+      <div class="panel panel-default" style="text-align: center; display:none;" id="controls">
+        <div class="panel-body">
+          Aktueller Stream: <b id="player_now_playing"></b>
 
-        <div style="margin: 15px auto; width: 75%; vertical-align: top;">
-        	<span id="player_current_time">00:00:00</span>
-			<input type="range" id="player_seek_range" onchange="seekTo();" name="points" value="1" min="1" max="10" val="1" style="display: inline-block; width: 50%; position: relative; top:2px; margin: 0 15px;">
-			<span id="player_duration">00:00:00</span>
+          <div style="margin: 15px auto; width: 75%; vertical-align: top;">
+            <span id="player_current_time">00:00:00</span>
+        <input type="range" id="player_seek_range" onchange="seekTo();" name="points" value="1" min="1" max="10" val="1" style="display: inline-block; width: 50%; position: relative; top:2px; margin: 0 15px;">
+        <span id="player_duration">00:00:00</span>
+          </div>
+
+          <button onclick="pause();" class="btn btn-default">
+            <span class="glyphicon glyphicon-pause"></span>
+            Pause
+          </button>
+          <button onclick="resume();" class="btn btn-default">
+            <span class="glyphicon glyphicon-play"></span>
+            Fortsetzen
+          </button>
+          <button onclick="stop();" class="btn btn-default">
+            <span class="glyphicon glyphicon-stop"></span>
+            Stop
+          </button>
+          <button onclick="volumeMute();" class="btn btn-default">
+            <span class="glyphicon glyphicon-volume-off"></span>
+          </button>
+          <button onclick="volumeDown();" class="btn btn-default">
+            <span class="glyphicon glyphicon-volume-down"></span>
+          </button>
+          <button onclick="volumeUp();" class="btn btn-default">
+            <span class="glyphicon glyphicon-volume-up"></span>
+          </button>
+          <button onclick="seek(false);" class="btn btn-default">
+            <span class="glyphicon glyphicon-backward"></span>
+            Zurückspulen
+          </button>
+          <button onclick="seek(true);" class="btn btn-default">
+            <span class="glyphicon glyphicon-forward"></span>
+            Vorspulen
+          </button> &nbsp;
         </div>
-
-        <button onclick="pause();" class="btn btn-default">
-          <span class="glyphicon glyphicon-pause"></span>
-          Pause
-        </button>
-        <button onclick="resume();" class="btn btn-default">
-          <span class="glyphicon glyphicon-play"></span>
-          Resume
-        </button>
-        <button onclick="stop();" class="btn btn-default">
-          <span class="glyphicon glyphicon-stop"></span>
-          Stop
-        </button>
-        <button onclick="volumeMute();" class="btn btn-default">
-          <span class="glyphicon glyphicon-volume-off"></span>
-        </button>
-        <button onclick="volumeDown();" class="btn btn-default">
-          <span class="glyphicon glyphicon-volume-down"></span>
-        </button>
-        <button onclick="volumeUp();" class="btn btn-default">
-          <span class="glyphicon glyphicon-volume-up"></span>
-        </button>
-        <button onclick="seek(false);" class="btn btn-default">
-          <span class="glyphicon glyphicon-backward"></span>
-          Backward
-        </button> &nbsp;
-        <select class="form-control" style="width: 50px;" id="player_seek">
-          <option value="1">1</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="30">30</option>
-          <option value="60">60</option>
-        </select> minutes
-        <button onclick="seek(true);" class="btn btn-default">
-          <span class="glyphicon glyphicon-forward"></span>
-          Forward
-        </button> &nbsp;
       </div>
-      <br/><br/>
       <div class="row">
         <div class="col-lg-12">
-          <h4>4 simple steps to playback any video or view any image on Chromecast</h4>
+          <h6>Um Videos aus der ARD Mediathek auf einem Chromecast abzuspielen, musst Du Folgendes tun:</h6>
           <br/>
           <ol>
             <li id="extension" style="margin-bottom:10px;">
-              Checking for Chromecast Extension. If you know you don't have the extension, <a href="https://chrome.google.com/webstore/detail/google-cast/boadgeojelhgndaghljhdicfkmllpafd" target="_blank">Click here to Install it</a> and then reload this page.
+              Suche Chromecast Erweiterung. Falls Du die Erweiterung noch nicht installiert hast, <a href="https://chrome.google.com/webstore/detail/google-cast/boadgeojelhgndaghljhdicfkmllpafd" target="_blank">klicke hier, um sie zu installieren,</a> und dann lade diese Seite noch einmal.
             </li>
             <li style="margin-bottom:10px;">
               <a onclick="launchApp();" id="chromecast">
-                Click here to connect to your Chromecast
+                Klicke hier um Deinen Chromecast zu verbinden.
               </a>
             </li>
             <li style="margin-bottom:10px;">
-              <input
-                type="text"
-                class="form-control"
-                style="width: 800px;"
-                id="url"
-                placeholder="Enter or paste a URL to play a video or view an image on Chromecast" />
+              Tatort auswählen:
+              <select id="tatortList">
+                <option value="">Tatort auswählen...</option>
+              </select>
+              <div class="row">
+                <div class="col-md-6 col-lg-6">
+                  oder ARD Mediathek Link oder eigene documentID angeben:
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="documentId"
+                  placeholder="ARD Mediathek Link oder documentId" />
+                </div>
+              </div>
             </li>
             <li style="margin-bottom:10px;">
-              <button onclick="startPlayback();" id="modal_play" type="button" class="btn btn-primary">
+              Qualität auswählen: 
+              <select id="quality">
+                <option value="3">höchste</option>
+                <option value="2">hoche</option>
+                <option value="1">mittlere</option>
+                <option value="0">niedrige</option>
+              </select>
+            </li>
+            <li style="margin-bottom:10px;">
+              <button onclick="startPlayback();" id="modal_play" type="button" class="btn btn-default">
                 <span class="glyphicon glyphicon-play"></span>
-                <span id="modal_play_text">Connect to Chromecast to Start Playback</span>
+                <span id="modal_play_text">Video auf Chromecast abspielen</span>
               </button>
             </li>
           </ol>
-          <br/><br/>
-          <a href="https://developers.google.com/cast/docs/media" target="_blank">List of media formats supported by Chromecast (Opens in a new tab)</a>
         </div>
       </div>
    </div>
     <!-- end of main body -->
+    <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+    <script type="text/javascript" src="js/castplayer.js"></script>
+    <script type="text/javascript" src="js/urlplayer.js"></script>
+
   </body>
 </html>

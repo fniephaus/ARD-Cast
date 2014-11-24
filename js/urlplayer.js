@@ -3,61 +3,68 @@ var currentUrl = '';
 
 $(function() {
   player = new CastPlayer();
-  var url = getUrlParameter("url")
-  if (url) {
-    $('#url').val(url);
-  }
+  $.ajax({
+    type: "GET",
+    url: "https://ardata.fniephaus.com/tatort.php",
+    dataType: "xml",
+    success: function (xml) {
+        // Parse the xml file and get data
+        var xmlDoc = $.parseXML(xml),
+            $xml = $(xmlDoc);
+        $(xml).find('item').each(function() {
+          var title = $(this).children('title').text();
+          var link = $(this).children('link').text();
+          if (getDuration($(this).children('description').text()) > 60) {
+            $('#tatortList').append('<option value="' + getDocumentId(link) + '">' + title + '</option>');
+          }
+        });
+    }
+  });
 });
 
-function getUrlParameter(sParam) {
-  var sPageURL = window.location.search.substring(1);
-  var sURLVariables = sPageURL.split('&');
-  for (var i = 0; i < sURLVariables.length; i++)  {
-    var sParameterName = sURLVariables[i].split('=');
-    if (sParameterName[0] == sParam) {
-      return decodeURIComponent(sParameterName[1]);
-    }
+function getDuration(description){
+  var re = new RegExp('([0-9]{2}):[0-9]{2} Min.');
+  var m = re.exec(description);
+  if (m == null) {
+    return 0;
   }
+  return parseInt(m[1]);
 }
 
+function getDocumentId(str) {
+  var re = new RegExp('documentId=([0-9]*)&');
+  var m = re.exec(str);
+  if (m != null && m.length == 2) {
+    return m[1];
+  }
+  return null;
+}
 
 function launchApp() {
   player.launchApp();
 }
 
-function getContentType(url) {
-  var ext = url.split('.').pop();
-  var formats = [
-    {ext: 'mkv', type: 'video'},
-    {ext: 'webm', type: 'video'},
-    {ext: 'mp4', type: 'video'},
-    {ext: 'm4v', type: 'video'},
-    {ext: 'm4a', type: 'audio'},
-    {ext: 'jpeg', type: 'image'},
-    {ext: 'jpg', type: 'image'},
-    {ext: 'gif', type: 'image'},
-    {ext: 'png', type: 'image'},
-    {ext: 'bmp', type: 'image'},
-    {ext: 'webp', type: 'image'}
-  ];
-  for (var i = 0; i < formats.length; i++) {
-    if (formats[i].ext == ext) {
-      return formats[i].type + "/" + ext;
+function startPlayback() {
+  var documentId = $('#tatortList option:selected').val();
+  if (documentId == "") {
+    var value = $('#documentId').val();
+    documentId = getDocumentId(value);
+    if (documentId == null){
+      documentId = value;
     }
   }
-  // it doesn't matter now, as it's unsupported.
-  return "";
-}
 
-function startPlayback() {
-  if (player.session == null || $('#url').val().trim() == "") {
+  if (player.session == null || isNaN(documentId)) {
     return;
   }
-  var url = decodeURIComponent($('#url').val());
-  var contentType = getContentType(url);
-  player.loadMedia(url, contentType);
-  $('#player_now_playing').html(url.split(/[\\/]/).pop());
-  $('#controls').show();
+
+  $.getJSON( "https://ardata.fniephaus.com/request.php?documentId=" + documentId, function( data ) {
+    var quality = parseInt($('#quality').val());
+    var url = decodeURIComponent(data['_mediaArray'][1]['_mediaStreamArray'][quality]['_stream']);
+    player.loadMedia(url, 'video/mp4');
+    $('#player_now_playing').html(url.split(/[\\/]/).pop());
+    $('#controls').show();
+  });
 }
 
 function pause() {
@@ -74,11 +81,11 @@ function resume() {
 
 function seek(is_forward) {
   if (player.session != null) {
-    player.seekMedia(parseInt($("#player_seek").val()), is_forward);
+    player.seekMedia(1, is_forward);
   }
 }
 
-function seekTo() {	
+function seekTo() { 
   if (player.session != null) {
     player.seekTo(parseInt($("#player_seek_range").val()));
   }

@@ -90,7 +90,7 @@ CastPlayer.prototype.initializeCastPlayer = function() {
     return;
   }
 
-  $('#extension').html("Chromecast Extension is already installed");
+  $('#extension').html("Chromecast Erweiterung ist bereits installiert");
   // default set to the default media receiver app ID
   // optional: you may change it to point to your own
   var applicationID = chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID;
@@ -187,6 +187,7 @@ CastPlayer.prototype.onRequestSessionSuccess = function(e) {
 };
 
 CastPlayer.prototype.onLaunchError = function() {
+  alert("Es konnte kein Chromecast gefunden werden!");
   console.log("launch error");
   this.deviceState = DEVICE_STATE.ERROR;
 };
@@ -279,9 +280,9 @@ CastPlayer.prototype.onMediaDiscovered = function(how, mediaSession) {
     this.castPlayerState = this.session.media[0].playerState;
     this.currentMediaTime = this.session.media[0].currentTime;
     this.currentMediaUrl = this.session.media[0].media.contentId;
-    if ($('#url').val() == "") {
-      $('#url').val(this.currentMediaUrl);
-    }
+    // if ($('#documentId').val() == "") {
+    //   $('#documentId').val(this.currentMediaUrl);
+    // }
     $('#player_now_playing').html(this.currentMediaUrl.split(/[\\/]/).pop());
     $('#controls').show();
   }
@@ -339,7 +340,7 @@ CastPlayer.prototype.incrementMediaTime = function() {
       this.currentMediaTime += 1;
       $('#player_current_time').html(this.formatTime(this.currentMediaTime));
       $('#player_seek_range').attr('max', this.currentMediaSession.media.duration);
-	    $('#player_seek_range').val(this.currentMediaTime);
+      $('#player_seek_range').val(this.currentMediaTime);
     } else {
       this.currentMediaTime = 0;
       clearInterval(this.timer);
