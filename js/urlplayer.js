@@ -14,22 +14,11 @@ $(function() {
         $(xml).find('item').each(function() {
           var title = $(this).children('title').text();
           var link = $(this).children('link').text();
-          if (getDuration($(this).children('description').text()) > 60) {
-            $('#tatortList').append('<option value="' + getDocumentId(link) + '">' + title + '</option>');
-          }
+          $('#tatortList').append('<option value="' + getDocumentId(link) + '">' + title + '</option>');
         });
     }
   });
 });
-
-function getDuration(description){
-  var re = new RegExp('([0-9]{2}):[0-9]{2} Min.');
-  var m = re.exec(description);
-  if (m == null) {
-    return 0;
-  }
-  return parseInt(m[1]);
-}
 
 function getDocumentId(str) {
   var re = new RegExp('documentId=([0-9]*)&');
